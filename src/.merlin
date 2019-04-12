@@ -1,0 +1,6 @@
+EXCLUDE_QUERY_DIR
+B /Users/connorbelman/.opam/default/lib/ocaml
+B ../_build/default/src/.comp.objs
+S /Users/connorbelman/.opam/default/lib/ocaml
+S .
+FLG -open Comp -w -40
