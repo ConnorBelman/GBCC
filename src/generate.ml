@@ -12,7 +12,7 @@ let rec code_gen ast file =
         | _ -> printf "fail")
     | Return(e) ->
         (match e with
-        | Constant(x) -> fprintf file "ld\tde,%s\n" (string_of_int x)
+        | Constant(x) -> fprintf file "ld de,$%04x\n" x
         | _ -> printf "fail")
 
 
