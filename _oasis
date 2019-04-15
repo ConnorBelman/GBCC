@@ -1,0 +1,21 @@
+Name: GBCC
+Version: 0.1
+Synopsis: A simple C compiler for the GBz80 processor
+Authors: Connor Belman
+License: MIT
+
+Description: A simple C compiler for the GBz80 processor
+Homepage: https://github.com/ConnorBelman/GBCC
+
+OASISFormat: 0.4
+BuildTools: ocamlbuild
+Plugins: META (0.4), DevFiles (0.4)
+
+Executable "gbcc"
+  Path: src
+  MainIs: gbcc.ml
+  BuildDepends: lib, str
+
+Library "lib"
+  Path: src
+  Modules: CTypes, TokenTypes, Utils, Lexer, Parser, Generate
