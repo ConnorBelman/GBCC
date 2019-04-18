@@ -12,7 +12,7 @@ BuildTools: ocamlbuild
 Plugins: META (0.4), DevFiles (0.4)
 
 Executable "gbcc"
-  Path: src
+  Path: bin
   MainIs: gbcc.ml
   BuildDepends: lib, str
 
