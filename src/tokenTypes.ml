@@ -10,4 +10,7 @@ type token =
     | Tok_Return
     | Tok_ID of string
     | Tok_Int of int
+    | Tok_Neg
+    | Tok_BitComp
+    | Tok_Not
     | EOF

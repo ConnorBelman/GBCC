@@ -16,6 +16,9 @@ let reg_operators : (Str.regexp * (token * int)) list =
         (";",                       Tok_Semi,       1);
         ("int[ \n\t]+",             Tok_Int_Type,   3);
         ("return[ \n\t]+",          Tok_Return,     6);
+        ("-",                       Tok_Neg,        1);
+        ("~",                       Tok_BitComp,    1);
+        ("!",                       Tok_Not,        1);
         ]
 ;;
 

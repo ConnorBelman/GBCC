@@ -4,6 +4,9 @@ type data_type =
 type expr =
     | ID of string
     | Constant of int
+    | Neg of expr
+    | BitComp of expr
+    | Not of expr
 
 type stmt =
     | NoOp

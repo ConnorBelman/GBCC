@@ -31,6 +31,18 @@ let rec parse_Expr toks =
     match lookahead toks with
         | Tok_ID(x) -> (match_token toks (lookahead toks), ID(x))
         | Tok_Int(x) -> (match_token toks (lookahead toks), Constant(x))
+        | Tok_Neg ->
+            let t = match_token toks Tok_Neg in
+            let (t', e) = parse_Expr t in
+            (t', Neg(e))
+        | Tok_BitComp ->
+            let t = match_token toks Tok_BitComp in
+            let (t', e) = parse_Expr t in
+            (t', BitComp(e))
+        | Tok_Not ->
+            let t = match_token toks Tok_Not in
+            let (t', e) = parse_Expr t in
+            (t', Not(e))
         | _ -> raise (InvalidInputException "statement token sent parse_Expr")
 
 let rec parse_Program toks =
