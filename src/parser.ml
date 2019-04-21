@@ -28,21 +28,51 @@ let lookahead toks =
         | h::t -> h
 
 let rec parse_Expr toks =
+    parse_AdditiveExpr toks
+and parse_AdditiveExpr toks =
+    let (t, e) = parse_MultiplicativeExpr toks in
+    match lookahead t with
+    | Tok_Plus ->
+        let t' = match_token t Tok_Plus in
+        let (t'', e') = parse_AdditiveExpr t' in
+        (t'', Add(e, e'))
+    | Tok_Neg ->
+        let t' = match_token t Tok_Neg in
+        let (t'', e') = parse_AdditiveExpr t' in
+        (t'', Sub(e, e'))
+    | _ -> (t, e)
+and parse_MultiplicativeExpr toks =
+    let (t, e) = parse_UnaryExpr toks in
+    match lookahead t with
+    | Tok_Mul ->
+        let t' = match_token t Tok_Mul in
+        let (t'', e') = parse_MultiplicativeExpr t' in
+        (t'', Mul(e, e'))
+    | _ -> (t, e)
+and parse_UnaryExpr toks =
+    match lookahead toks with
+    | Tok_Neg ->
+        let t = match_token toks Tok_Neg in
+        let (t', e) = parse_UnaryExpr t in
+        (t', Neg(e))
+    | Tok_BitComp ->
+        let t = match_token toks Tok_BitComp in
+        let (t', e) = parse_UnaryExpr t in
+        (t', BitComp(e))
+    | Tok_Not ->
+        let t = match_token toks Tok_Not in
+        let (t', e) = parse_UnaryExpr t in
+        (t', Not(e))
+    | _ -> parse_PrimaryExpr toks
+and parse_PrimaryExpr toks =
     match lookahead toks with
         | Tok_ID(x) -> (match_token toks (lookahead toks), ID(x))
         | Tok_Int(x) -> (match_token toks (lookahead toks), Constant(x))
-        | Tok_Neg ->
-            let t = match_token toks Tok_Neg in
+        | Tok_LParen ->
+            let t = match_token toks Tok_LParen in
             let (t', e) = parse_Expr t in
-            (t', Neg(e))
-        | Tok_BitComp ->
-            let t = match_token toks Tok_BitComp in
-            let (t', e) = parse_Expr t in
-            (t', BitComp(e))
-        | Tok_Not ->
-            let t = match_token toks Tok_Not in
-            let (t', e) = parse_Expr t in
-            (t', Not(e))
+            let t'' = match_token t' Tok_RParen in
+            (t'', e)
         | _ -> raise (InvalidInputException "statement token sent parse_Expr")
 
 let rec parse_Program toks =

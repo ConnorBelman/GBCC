@@ -1,6 +1,6 @@
 EXCLUDE_QUERY_DIR
 B /Users/connorbelman/.opam/default/lib/ocaml
-B ../_build/default/src/.comp.objs
+B ../_build/default/src/.GBCC.objs
 S /Users/connorbelman/.opam/default/lib/ocaml
 S .
-FLG -open Comp -w -40
+FLG -open GBCC -w -40

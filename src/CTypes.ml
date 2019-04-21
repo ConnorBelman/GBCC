@@ -7,6 +7,9 @@ type expr =
     | Neg of expr
     | BitComp of expr
     | Not of expr
+    | Add of expr * expr
+    | Sub of expr * expr
+    | Mul of expr * expr
 
 type stmt =
     | NoOp

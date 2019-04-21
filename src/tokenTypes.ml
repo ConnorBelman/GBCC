@@ -13,4 +13,6 @@ type token =
     | Tok_Neg
     | Tok_BitComp
     | Tok_Not
+    | Tok_Plus
+    | Tok_Mul
     | EOF

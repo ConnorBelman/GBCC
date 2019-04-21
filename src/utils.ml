@@ -14,6 +14,8 @@ let string_of_token (t : token) : string = match t with
     | Tok_Neg -> "Tok_Neg"
     | Tok_BitComp -> "Tok_BitComp"
     | Tok_Not -> "Tok_Not"
+    | Tok_Plus -> "Tok_Plus"
+    | Tok_Mul -> "Tok_Mul"
     | EOF -> "EOF"
 
 let string_of_list ?newline:(newline=false) (f : 'a -> string) (l : 'a list) : string =

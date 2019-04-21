@@ -1,4 +1,4 @@
 (library 
-(name comp)
-(modules gbcc lexer parser CTypes tokenTypes utils)
+(name GBCC)
+(modules lexer parser CTypes tokenTypes utils tokTest)
 (libraries str))
