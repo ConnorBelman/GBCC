@@ -23,13 +23,18 @@ let reg_operators : (Str.regexp * (token * int)) list =
         ("/",               Tok_Div,            1);
         ("&&",              Tok_And,            2);
         ("||",              Tok_Or,             2);
+        ("<<",              Tok_ShiftLeft,      2);
+        (">>",              Tok_ShiftRight,     2);
         ("==",              Tok_Equal,          2);
         ("!=",              Tok_NotEqual,       2);
         ("<=",              Tok_LessEqual,      2);
         (">=",              Tok_GreaterEqual,   2);
         ("<",               Tok_Less,           1);
         (">",               Tok_Greater,        1);
-        ("!",               Tok_Not,            1)
+        ("!",               Tok_Not,            1);
+        ("&",               Tok_BitAnd,         1);
+        ("|",               Tok_BitOr,          1);
+        ("\\^",             Tok_BitXor,         1)
         ]
 ;;
 

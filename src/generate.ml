@@ -4,13 +4,18 @@ open Printf
 let rec parseRet expr =
     match expr with
     | Constant(x) -> x
-    | Neg(x) -> 65535 land (-(parseRet(x)))
-    | BitComp(x) -> 65535 land (lnot (parseRet(x)))
-    | Not(x) -> if parseRet x = 0 then 1 else 0
+    | Neg(x) -> 65535 land (-(parseRet x))
+    | BitComp(x) -> 65535 land (lnot (parseRet x))
+    | BitOr(x, y) -> 65535 land (parseRet x lor parseRet y)
+    | BitXor(x, y) -> 65535 land (parseRet x lxor parseRet y)
+    | BitAnd(x, y) -> 65535 land (parseRet x land parseRet y)
+    | ShiftLeft(x, y) -> 65535 land (parseRet x lsl parseRet y)
+    | ShiftRight(x, y) -> 65535 land (parseRet x lsr parseRet y)
     | Add(x, y) -> 65535 land (parseRet x + parseRet y)
     | Sub(x, y) -> 65535 land (parseRet x - parseRet y)
     | Mul(x, y) -> 65535 land (parseRet x * parseRet y)
     | Div(x, y) -> 65535 land (parseRet x / parseRet y)
+    | Not(x) -> if parseRet x = 0 then 1 else 0
     | And(x, y) -> if (parseRet x != 0) && (parseRet y != 0) then 1 else 0
     | Or(x, y) -> if (parseRet x != 0) || (parseRet y != 0) then 1 else 0
     | Equal(x, y) -> if parseRet x = parseRet y then 1 else 0

@@ -17,6 +17,11 @@ let string_of_token (t : token) : string = match t with
     | Tok_Plus -> "Tok_Plus"
     | Tok_Mul -> "Tok_Mul"
     | Tok_Div -> "Tok_Div"
+    | Tok_BitOr -> "Tok_BitOr"
+    | Tok_BitAnd -> "Tok_BitAnd"
+    | Tok_BitXor -> "Tok_BitXor"
+    | Tok_ShiftLeft -> "Tok_ShiftLeft"
+    | Tok_ShiftRight -> "Tok_ShiftRight"
     | EOF -> "EOF"
 
 let string_of_list ?newline:(newline=false) (f : 'a -> string) (l : 'a list) : string =

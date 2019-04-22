@@ -6,6 +6,11 @@ type expr =
     | Constant of int
     | Neg of expr
     | BitComp of expr
+    | BitOr of expr * expr
+    | BitAnd of expr * expr
+    | BitXor of expr * expr
+    | ShiftLeft of expr * expr
+    | ShiftRight of expr * expr
     | Not of expr
     | Add of expr * expr
     | Sub of expr * expr

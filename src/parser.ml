@@ -38,12 +38,36 @@ and parse_OrExpr toks =
         (t'', Or(e, e'))
     | _ -> (t, e)
 and parse_AndExpr toks =
-    let (t, e) = parse_EqualityExpr toks in
+    let (t, e) = parse_BitOrExpr toks in
     match lookahead t with
     | Tok_And ->
         let t' = match_token t Tok_And in
         let (t'', e') = parse_AndExpr t' in
         (t'', And(e, e'))
+    | _ -> (t, e)
+and parse_BitOrExpr toks =
+    let (t, e) = parse_BitXorExpr toks in
+    match lookahead t with
+    | Tok_BitOr ->
+        let t' = match_token t Tok_BitOr in
+        let (t'', e') = parse_BitOrExpr t' in
+        (t'', BitOr(e, e'))
+    | _ -> (t, e)
+and parse_BitXorExpr toks =
+    let (t, e) = parse_BitAndExpr toks in
+    match lookahead t with
+    | Tok_BitXor ->
+        let t' = match_token t Tok_BitXor in
+        let (t'', e') = parse_BitXorExpr t' in
+        (t'', BitXor(e, e'))
+    | _ -> (t, e)
+and parse_BitAndExpr toks =
+    let (t, e) = parse_EqualityExpr toks in
+    match lookahead t with
+    | Tok_BitAnd ->
+        let t' = match_token t Tok_BitAnd in
+        let (t'', e') = parse_BitAndExpr t' in
+        (t'', BitAnd(e, e'))
     | _ -> (t, e)
 and parse_EqualityExpr toks =
     let (t, e) = parse_RelationalExpr toks in
@@ -58,7 +82,7 @@ and parse_EqualityExpr toks =
         (t'', NotEqual(e, e'))
     | _ -> (t, e)
 and parse_RelationalExpr toks =
-    let (t, e) = parse_AdditiveExpr toks in
+    let (t, e) = parse_ShiftExpr toks in
     match lookahead t with
     | Tok_Less ->
         let t' = match_token t Tok_Less in
@@ -76,6 +100,18 @@ and parse_RelationalExpr toks =
         let t' = match_token t Tok_GreaterEqual in
         let (t'', e') = parse_RelationalExpr t' in
         (t'', GreaterEqual(e, e'))
+    | _ -> (t, e)
+and parse_ShiftExpr toks =
+    let (t, e) = parse_AdditiveExpr toks in
+    match lookahead t with
+    | Tok_ShiftLeft ->
+        let t' = match_token t Tok_ShiftLeft in
+        let (t'', e') = parse_ShiftExpr t' in
+        (t'', ShiftLeft(e, e'))
+    | Tok_ShiftRight ->
+        let t' = match_token t Tok_ShiftRight in
+        let (t'', e') = parse_ShiftExpr t' in
+        (t'', ShiftRight(e, e'))
     | _ -> (t, e)
 and parse_AdditiveExpr toks =
     let (t, e) = parse_MultiplicativeExpr toks in

@@ -12,6 +12,11 @@ type token =
     | Tok_Int of int
     | Tok_Neg
     | Tok_BitComp
+    | Tok_BitOr
+    | Tok_BitAnd
+    | Tok_BitXor
+    | Tok_ShiftLeft
+    | Tok_ShiftRight
     | Tok_Not
     | Tok_Plus
     | Tok_Mul
