@@ -28,7 +28,55 @@ let lookahead toks =
         | h::t -> h
 
 let rec parse_Expr toks =
-    parse_AdditiveExpr toks
+    parse_OrExpr toks
+and parse_OrExpr toks =
+    let (t, e) = parse_AndExpr toks in
+    match lookahead t with
+    | Tok_Or ->
+        let t' = match_token t Tok_Or in
+        let (t'', e') = parse_OrExpr t' in
+        (t'', Or(e, e'))
+    | _ -> (t, e)
+and parse_AndExpr toks =
+    let (t, e) = parse_EqualityExpr toks in
+    match lookahead t with
+    | Tok_And ->
+        let t' = match_token t Tok_And in
+        let (t'', e') = parse_AndExpr t' in
+        (t'', And(e, e'))
+    | _ -> (t, e)
+and parse_EqualityExpr toks =
+    let (t, e) = parse_RelationalExpr toks in
+    match lookahead t with
+    | Tok_Equal ->
+        let t' = match_token t Tok_Equal in
+        let (t'', e') = parse_EqualityExpr t' in
+        (t'', Equal(e, e'))
+    | Tok_NotEqual ->
+        let t' = match_token t Tok_NotEqual in
+        let (t'', e') = parse_EqualityExpr t' in
+        (t'', NotEqual(e, e'))
+    | _ -> (t, e)
+and parse_RelationalExpr toks =
+    let (t, e) = parse_AdditiveExpr toks in
+    match lookahead t with
+    | Tok_Less ->
+        let t' = match_token t Tok_Less in
+        let (t'', e') = parse_RelationalExpr t' in
+        (t'', Less(e, e'))
+    | Tok_Greater ->
+        let t' = match_token t Tok_Greater in
+        let (t'', e') = parse_RelationalExpr t' in
+        (t'', Greater(e, e'))
+    | Tok_LessEqual ->
+        let t' = match_token t Tok_LessEqual in
+        let (t'', e') = parse_RelationalExpr t' in
+        (t'', LessEqual(e, e'))
+    | Tok_GreaterEqual ->
+        let t' = match_token t Tok_GreaterEqual in
+        let (t'', e') = parse_RelationalExpr t' in
+        (t'', GreaterEqual(e, e'))
+    | _ -> (t, e)
 and parse_AdditiveExpr toks =
     let (t, e) = parse_MultiplicativeExpr toks in
     match lookahead t with

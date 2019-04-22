@@ -16,4 +16,12 @@ type token =
     | Tok_Plus
     | Tok_Mul
     | Tok_Div
+    | Tok_And
+    | Tok_Or
+    | Tok_Equal
+    | Tok_NotEqual
+    | Tok_Greater
+    | Tok_GreaterEqual
+    | Tok_Less
+    | Tok_LessEqual
     | EOF

@@ -11,6 +11,14 @@ let rec parseRet expr =
     | Sub(x, y) -> 65535 land (parseRet x - parseRet y)
     | Mul(x, y) -> 65535 land (parseRet x * parseRet y)
     | Div(x, y) -> 65535 land (parseRet x / parseRet y)
+    | And(x, y) -> if (parseRet x != 0) && (parseRet y != 0) then 1 else 0
+    | Or(x, y) -> if (parseRet x != 0) || (parseRet y != 0) then 1 else 0
+    | Equal(x, y) -> if parseRet x = parseRet y then 1 else 0
+    | NotEqual(x, y) -> if parseRet x != parseRet y then 1 else 0
+    | Less(x, y) -> if parseRet x < parseRet y then 1 else 0
+    | Greater(x, y) -> if parseRet x > parseRet y then 1 else 0
+    | LessEqual(x, y) -> if parseRet x <= parseRet y then 1 else 0
+    | GreaterEqual(x, y) -> if parseRet x >= parseRet y then 1 else 0
 
 
 

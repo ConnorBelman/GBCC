@@ -11,6 +11,14 @@ type expr =
     | Sub of expr * expr
     | Mul of expr * expr
     | Div of expr * expr
+    | And of expr * expr
+    | Or of expr * expr
+    | Equal of expr * expr
+    | NotEqual of expr * expr
+    | Greater of expr * expr
+    | GreaterEqual of expr * expr
+    | Less of expr * expr
+    | LessEqual of expr * expr
 
 type stmt =
     | NoOp
