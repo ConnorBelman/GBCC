@@ -15,4 +15,5 @@ type token =
     | Tok_Not
     | Tok_Plus
     | Tok_Mul
+    | Tok_Div
     | EOF

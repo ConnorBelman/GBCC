@@ -21,6 +21,7 @@ let reg_operators : (Str.regexp * (token * int)) list =
         ("!",               Tok_Not,        1);
         ("+",               Tok_Plus,       1);
         ("*",               Tok_Mul,        1);
+        ("/",               Tok_Div,        1)
         ]
 ;;
 

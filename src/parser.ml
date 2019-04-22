@@ -48,6 +48,10 @@ and parse_MultiplicativeExpr toks =
         let t' = match_token t Tok_Mul in
         let (t'', e') = parse_MultiplicativeExpr t' in
         (t'', Mul(e, e'))
+    | Tok_Div ->
+        let t' = match_token t Tok_Div in
+        let (t'', e') = parse_MultiplicativeExpr t' in
+        (t'', Div(e, e'))
     | _ -> (t, e)
 and parse_UnaryExpr toks =
     match lookahead toks with
