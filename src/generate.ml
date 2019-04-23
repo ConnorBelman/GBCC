@@ -4,19 +4,40 @@ open Printf
 let rec parseRet expr file =
     match expr with
     | Constant(x) -> fprintf file "ld a,$%02X\n\t" x
-    (* | Neg(x) ->255 land (-(parseRet x))
-    | BitComp(x) -> 255 land (lnot (parseRet x))
-    | BitOr(x, y) -> 255 land (parseRet x lor parseRet y)
-    | BitXor(x, y) -> 255 land (parseRet x lxor parseRet y)
-    | BitAnd(x, y) -> 255 land (parseRet x land parseRet y)
-    | ShiftLeft(x, y) -> 255 land (parseRet x lsl parseRet y)
-    | ShiftRight(x, y) -> 255 land (parseRet x lsr parseRet y) *)
-    | Add(x, y) ->
-        parseRet x file;
-        fprintf file "push af\n\t";
+    (* | Constant(x) -> x
+    | Neg(x) ->255 land (-(parseRet x))
+    | BitComp(x) -> 255 land (lnot (parseRet x)) *)
+    | BitOr(x, y) ->
         parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
+        fprintf file "pop bc\n\tor b\n\t"
+    (* | BitOr(x, y) -> 255 land (parseRet x lor parseRet y) *)
+    | BitXor(x, y) ->
+        parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
+        fprintf file "pop bc\n\txor b\n\t"
+    (* | BitXor(x, y) -> 255 land (parseRet x lxor parseRet y) *)
+    | BitAnd(x, y) ->
+        parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
+        fprintf file "pop bc\n\tand b\n\t"
+    (* | BitAnd(x, y) -> 255 land (parseRet x land parseRet y) *)
+    (* | ShiftLeft(x, y) -> 255 land (parseRet x lsl parseRet y) *)
+    (* | ShiftRight(x, y) -> 255 land (parseRet x lsr parseRet y) *)
+    | Add(x, y) ->
+        parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
         fprintf file "pop bc\n\tadd a,b\n\t"
-
+    (* | Add(x, y) -> 255 land (parseRet x + parseRet y) *)
+    | Sub(x, y) ->
+        parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
+        fprintf file "pop bc\n\tsub b\n\t"
     (* | Sub(x, y) -> 255 land (parseRet x - parseRet y)
     | Mul(x, y) -> 255 land (parseRet x * parseRet y)
     | Div(x, y) -> 255 land (parseRet x / parseRet y)
