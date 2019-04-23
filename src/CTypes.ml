@@ -28,8 +28,10 @@ type expr =
 type stmt =
     | NoOp
     | Program of stmt
-    | Function of expr * stmt
+    | Function of string * stmt
     | Return of expr
+    | Declare of string * expr option
+    | Expr of expr
 
 type value =
     | Int_Val of int

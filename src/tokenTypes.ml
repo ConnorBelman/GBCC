@@ -29,4 +29,5 @@ type token =
     | Tok_GreaterEqual
     | Tok_Less
     | Tok_LessEqual
+    | Tok_Assign
     | EOF

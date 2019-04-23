@@ -34,7 +34,8 @@ let reg_operators : (Str.regexp * (token * int)) list =
         ("!",               Tok_Not,            1);
         ("&",               Tok_BitAnd,         1);
         ("|",               Tok_BitOr,          1);
-        ("\\^",             Tok_BitXor,         1)
+        ("\\^",             Tok_BitXor,         1);
+        ("=",               Tok_Assign,         1)
         ]
 ;;
 

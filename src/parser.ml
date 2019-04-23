@@ -167,14 +167,35 @@ let rec parse_Program toks =
     let (t,s) = parse_Function toks in (t, Program(s))
 and parse_Function toks =
     let t = match_token toks Tok_Int_Type in
-    let (t', id) = parse_Expr t in
+    let (t', ID(x)) = parse_Expr t in
     let t'' = match_tokens t' [Tok_LParen; Tok_RParen; Tok_LBrace] in
     let (t3, s) = parse_Statement t'' in
-    let t4 = match_token t3 Tok_RBrace in (t4, Function(id, s))
+    let t4 = match_token t3 Tok_RBrace in (t4, Function(x, s))
 and parse_Statement toks =
-    let t = match_token toks Tok_Return in
-    let (t', e) = parse_Expr t in
-    let t'' = match_token t' Tok_Semi in (t'', Return(e))
+    match lookahead toks with
+    | Tok_Return ->
+        let t = match_token toks Tok_Return in
+        let (t', e) = parse_Expr t in
+        let t'' = match_token t' Tok_Semi in
+        (t'', Return(e))
+    | Tok_Int_Type ->
+        let t = match_token toks Tok_Int_Type in
+        let (t', ID(x)) = parse_Expr t in
+        (match lookahead t' with
+        | Tok_Assign ->
+            let t'' = match_token t' Tok_Assign in
+            let (t3, e) = parse_Expr t'' in
+            let t4 = match_token t3 Tok_Semi in
+            (t4, Declare(x, Some e))
+        | Tok_Semi ->
+            let t'' = match_token t' Tok_Semi in
+            (t'', Declare(x, None))
+        | _ -> raise (InvalidInputException "unexpected token found in parse_Statement"))
+    | _ ->
+        let (t, e) = parse_Expr toks in
+        let t' = match_token t Tok_Semi in
+        (t', Expr(e))
+
 
 let parse_main toks =
     let (t, s) = parse_Program toks in
