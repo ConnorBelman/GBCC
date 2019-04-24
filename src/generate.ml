@@ -50,18 +50,18 @@ let rec parseRet expr file =
         fprintf file "push af\n\t";
         parseRet x file;
         fprintf file "pop bc\n\tsub b\n\t"
-    (* | Sub(x, y) -> 255 land (parseRet x - parseRet y)
-    | Mul(x, y) -> 255 land (parseRet x * parseRet y)
-    | Div(x, y) -> 255 land (parseRet x / parseRet y) *)
-    (* | Not(x) -> if parseRet x = 0 then 1 else 0
-    | And(x, y) -> if (parseRet x != 0) && (parseRet y != 0) then 1 else 0
-    | Or(x, y) -> if (parseRet x != 0) || (parseRet y != 0) then 1 else 0 *)
+    (* | Sub(x, y) -> 255 land (parseRet x - parseRet y) *)
+    (* | Mul(x, y) -> 255 land (parseRet x * parseRet y) *)
+    (* | Div(x, y) -> 255 land (parseRet x / parseRet y) *)
+    (* | Not(x) -> if parseRet x = 0 then 1 else 0 *)
+    (* | And(x, y) -> if (parseRet x != 0) && (parseRet y != 0) then 1 else 0 *)
+    (* | Or(x, y) -> if (parseRet x != 0) || (parseRet y != 0) then 1 else 0 *)
     | Equal(x, y) ->
         let j = fresh() in
         parseRet y file;
         fprintf file "push af\n\t";
         parseRet x file;
-        fprintf file "pop bc\n\tcp b\n\tld a,$00\n\tjp nz,_cp%d\n\tld a,$01\n_cp%d\n\tret\n\t" j j
+        fprintf file "pop bc\n\tcp b\n\tld a,$00\n\tjp nz,_cp%d\n\tld a,$01\n_cp%d:\n\t" j j
     (* | Equal(x, y) -> if parseRet x = parseRet y then 1 else 0 *)
     | NotEqual(x, y) ->
         parseRet y file;
@@ -69,10 +69,34 @@ let rec parseRet expr file =
         parseRet x file;
         fprintf file "pop bc\n\tsub b\n\t"
     (* | NotEqual(x, y) -> if parseRet x != parseRet y then 1 else 0 *)
-    (* | Less(x, y) -> if parseRet x < parseRet y then 1 else 0
-    | Greater(x, y) -> if parseRet x > parseRet y then 1 else 0
-    | LessEqual(x, y) -> if parseRet x <= parseRet y then 1 else 0
-    | GreaterEqual(x, y) -> if parseRet x >= parseRet y then 1 else 0 *)
+    | Less(x, y) ->
+        let j = fresh() in
+        parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
+        fprintf file "pop bc\n\tcp b\n\tld a,$00\n\tjp nc,_cp%d\n\tld a,$01\n_cp%d:\n\t" j j
+    (* | Less(x, y) -> if parseRet x < parseRet y then 1 else 0 *)
+    | Greater(x, y) ->
+        let j = fresh() in
+        parseRet x file;
+        fprintf file "push af\n\t";
+        parseRet y file;
+        fprintf file "pop bc\n\tcp b\n\tld a,$00\n\tjp nc,_cp%d\n\tld a,$01\n_cp%d:\n\t" j j
+    (* | Greater(x, y) -> if parseRet x > parseRet y then 1 else 0 *)
+    | LessEqual(x, y) ->
+        let j = fresh() in
+        parseRet x file;
+        fprintf file "push af\n\t";
+        parseRet y file;
+        fprintf file "pop bc\n\tcp b\n\tld a,$00\n\tjp c,_cp%d\n\tld a,$01\n_cp%d:\n\t" j j
+    (* | LessEqual(x, y) -> if parseRet x <= parseRet y then 1 else 0 *)
+    | GreaterEqual(x, y) ->
+        let j = fresh() in
+        parseRet y file;
+        fprintf file "push af\n\t";
+        parseRet x file;
+        fprintf file "pop bc\n\tcp b\n\tld a,$00\n\tjp c,_cp%d\n\tld a,$01\n_cp%d:\n\t" j j
+    (* | GreaterEqual(x, y) -> if parseRet x >= parseRet y then 1 else 0 *)
 
 
 
