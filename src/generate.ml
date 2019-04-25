@@ -37,7 +37,19 @@ let rec parseRet expr file =
         parseRet x file;
         fprintf file "\tpop bc\n\tand b\n"
     (* | BitAnd(x, y) -> 255 land (parseRet x land parseRet y) *)
+    | ShiftLeft(x, y) ->
+        let j = fresh() in
+        parseRet x file;
+        fprintf file "\tpush af\n";
+        parseRet y file;
+        fprintf file "\tpop bc\n_sl%d:\n\tand a\n\tjp z,_slend%d\n\tsla b\n\tdec a\n\tjp _sl%d\n_slend%d:\n\tld a,b\n" j j j j
     (* | ShiftLeft(x, y) -> 255 land (parseRet x lsl parseRet y) *)
+    | ShiftRight(x, y) ->
+        let j = fresh() in
+        parseRet x file;
+        fprintf file "\tpush af\n";
+        parseRet y file;
+        fprintf file "\tpop bc\n_sr%d:\n\tand a\n\tjp z,_srend%d\n\tsrl b\n\tdec a\n\tjp _sr%d\n_srend%d:\n\tld a,b\n" j j j j
     (* | ShiftRight(x, y) -> 255 land (parseRet x lsr parseRet y) *)
     | Add(x, y) ->
         parseRet y file;
