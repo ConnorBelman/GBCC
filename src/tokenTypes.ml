@@ -21,6 +21,7 @@ type token =
     | Tok_Plus
     | Tok_Mul
     | Tok_Div
+    | Tok_Mod
     | Tok_And
     | Tok_Or
     | Tok_Equal

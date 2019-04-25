@@ -16,6 +16,7 @@ type expr =
     | Sub of expr * expr
     | Mul of expr * expr
     | Div of expr * expr
+    | Mod of expr * expr
     | And of expr * expr
     | Or of expr * expr
     | Equal of expr * expr

@@ -17,6 +17,7 @@ let string_of_token (t : token) : string = match t with
     | Tok_Plus -> "Tok_Plus"
     | Tok_Mul -> "Tok_Mul"
     | Tok_Div -> "Tok_Div"
+    | Tok_Mod -> "Tok_Mod"
     | Tok_BitOr -> "Tok_BitOr"
     | Tok_BitAnd -> "Tok_BitAnd"
     | Tok_BitXor -> "Tok_BitXor"

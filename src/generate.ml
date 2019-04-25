@@ -58,7 +58,20 @@ let rec parseRet expr file =
         parseRet y file;
         fprintf file "\tand a\n\tjp z,_multz%d\n\tld b,a\n\tdec b\n\tpop af\n\tand a\n\tjp z,_multz%d\n\tld c,a\n_mult%d:\n\tadd a,c\n\tdec b\n\tjp nz,_mult%d\n\tjp _multend%d\n_multz%d:\n\tld a,#0x00\n_multend%d:\n" j j j j j j j
     (* | Mul(x, y) -> 255 land (parseRet x * parseRet y) *)
+    | Div(x, y) ->
+        let j = fresh() in
+        parseRet y file;
+        fprintf file "\tpush af\n";
+        parseRet x file;
+        fprintf file "\tpop bc\n\tld c,#0x00\n_div%d:\n\tcp b\n\tjp c,_divend%d\n\tinc c\n\tsub b\n\tjp _div%d\n _divend%d:\n\tld a,c\n" j j j j
     (* | Div(x, y) -> 255 land (parseRet x / parseRet y) *)
+    | Mod(x, y) ->
+        let j = fresh() in
+        parseRet y file;
+        fprintf file "\tpush af\n";
+        parseRet x file;
+        fprintf file "\tpop bc\n_mod%d:\n\tcp b\n\tjp c,_modend%d\n\tsub b\n\tjp _mod%d\n_modend%d:\n " j j j j
+    (* | Mod(x, y) -> 255 land (parseRet x % parseRet y) *)
     | Not(x) ->
         let j = fresh() in
         parseRet x file;
