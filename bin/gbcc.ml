@@ -22,4 +22,4 @@ let () =
         close_in_noerr ic;
     let tokens = List.rev @@ EOF::!toks in
     let ast = parse_main tokens in
-    code_gen ast oc
+    code_gen_program ast oc

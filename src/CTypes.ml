@@ -25,11 +25,12 @@ type expr =
     | GreaterEqual of expr * expr
     | Less of expr * expr
     | LessEqual of expr * expr
+    | Assign of string * expr
 
 type stmt =
     | NoOp
     | Program of stmt
-    | Function of string * stmt
+    | Function of string * stmt list
     | Return of expr
     | Declare of string * expr option
     | Expr of expr
