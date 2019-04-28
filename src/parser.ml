@@ -197,6 +197,11 @@ let rec parse_Statement toks lst =
             let t'' = match_token t' Tok_Semi in
             parse_Statement t'' (lst@[Declare(x, None)])
         | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Statement %s" (string_of_token (lookahead toks)))))
+    | Tok_ID(x) ->
+        let t = match_tokens toks [Tok_ID(x);Tok_Assign] in
+        let (t', e) = parse_Expr t in
+        let t'' = match_token t' Tok_Semi in
+        parse_Statement t'' (lst@[Assign(x, e)])
     | Tok_RBrace -> (toks, lst)
     | _ ->
         let (t, e) = parse_Expr toks in

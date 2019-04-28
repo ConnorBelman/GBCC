@@ -25,7 +25,6 @@ type expr =
     | GreaterEqual of expr * expr
     | Less of expr * expr
     | LessEqual of expr * expr
-    | Assign of string * expr
 
 type stmt =
     | NoOp
@@ -34,6 +33,7 @@ type stmt =
     | Return of expr
     | Declare of string * expr option
     | Expr of expr
+    | Assign of string * expr
 
 type value =
     | Int_Val of int
