@@ -23,6 +23,10 @@ let rec parse_expr e vmap file =
     | ID(x) ->
         let var_offset = var_find vmap x in
         fprintf file "\tld h,b\n\tld l,c\n\tld de,#0x%04X\n\tadd hl,de\n\tld a,(hl)\n" (65535 land var_offset)
+    | Assign(x, e) ->
+        parse_expr e vmap file;
+        let var_offset = var_find vmap x in
+        fprintf file "\tld h,b\n\tld l,c\n\tld de,#0x%04X\n\tadd hl,de\n\tld (hl),a\n" (65535 land var_offset)
     | Constant(x) -> fprintf file "\tld a,#0x%02X\n" x
     (* | Constant(x) -> x *)
     | Neg(x) ->
@@ -176,11 +180,6 @@ let rec code_gen_function lst vmap si file =
             parse_expr e vmap file;
             fprintf file "\tld l,a\n\tpush hl\n";);
         code_gen_function t ((x, si)::vmap) (si - 2) file
-    | Assign(x, e)::t ->
-        parse_expr e vmap file;
-        let var_offset = var_find vmap x in
-        fprintf file "\tld h,b\n\tld l,c\n\tld de,#0x%04X\n\tadd hl,de\n\tld (hl),a\n" (65535 land var_offset);
-        code_gen_function t vmap si file
     | _ -> printf "Error: unmatched statement in code_gen_function"
 
 let rec code_gen_program ast file =

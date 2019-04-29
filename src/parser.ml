@@ -28,17 +28,17 @@ let lookahead toks =
         | h::t -> h
 
 let rec parse_Expr toks =
-    (* let (t, e) = parse_OrExpr toks in
-    match e with
-    | ID(x) ->
+    match lookahead toks with
+    | Tok_ID(x) ->
+        let t = match_token toks (Tok_ID(x)) in
         (match lookahead t with
         | Tok_Assign ->
             let t' = match_token t Tok_Assign in
-            let (t'', e') = parse_Expr t' in
-            (t'', Assign(x, e'))
-        | _ -> (t, e))
-    | _ -> (t, e) *)
-    parse_OrExpr toks
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, e))
+        | Tok_Semi -> (t, ID(x))
+        | _ -> parse_OrExpr toks)
+    | _ -> parse_OrExpr toks
 and parse_OrExpr toks =
     let (t, e) = parse_AndExpr toks in
     match lookahead t with
@@ -168,8 +168,8 @@ and parse_UnaryExpr toks =
     | _ -> parse_PrimaryExpr toks
 and parse_PrimaryExpr toks =
     match lookahead toks with
-        | Tok_ID(x) -> (match_token toks (lookahead toks), ID(x))
-        | Tok_Int(x) -> (match_token toks (lookahead toks), Constant(x))
+        | Tok_ID(x) -> (match_token toks (Tok_ID(x)), ID(x))
+        | Tok_Int(x) -> (match_token toks (Tok_Int(x)), Constant(x))
         | Tok_LParen ->
             let t = match_token toks Tok_LParen in
             let (t', e) = parse_Expr t in
@@ -186,7 +186,7 @@ let rec parse_Statement toks lst =
         parse_Statement t'' (lst@[Return(e)])
     | Tok_Int_Type ->
         let t = match_token toks Tok_Int_Type in
-        let (t', ID(x)) = parse_Expr t in
+        (*let (t', ID(x)) = parse_Expr t in
         (match lookahead t' with
         | Tok_Assign ->
             let t'' = match_token t' Tok_Assign in
@@ -196,28 +196,38 @@ let rec parse_Statement toks lst =
         | Tok_Semi ->
             let t'' = match_token t' Tok_Semi in
             parse_Statement t'' (lst@[Declare(x, None)])
-        | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Statement %s" (string_of_token (lookahead toks)))))
-    | Tok_ID(x) ->
-        let t = match_tokens toks [Tok_ID(x);Tok_Assign] in
-        let (t', e) = parse_Expr t in
-        let t'' = match_token t' Tok_Semi in
-        parse_Statement t'' (lst@[Assign(x, e)])
+        | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Statement %s" (string_of_token (lookahead toks))))) *)
+        let Tok_ID(x) = lookahead t in
+        let t' = match_token t (Tok_ID(x)) in
+        (match lookahead t' with
+        | Tok_Assign ->
+            let t'' = match_token t' Tok_Assign in
+            let (t3, e) = parse_Expr t'' in
+            let t4 = match_token t3 Tok_Semi in
+            parse_Statement t4 (lst@[Declare(x, Some e)])
+        | Tok_Semi ->
+            let t'' = match_token t' Tok_Semi in
+            parse_Statement t'' (lst@[Declare(x, None)])
+        | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Statement %s" (string_of_token (lookahead t')))))
     | Tok_RBrace -> (toks, lst)
     | _ ->
         let (t, e) = parse_Expr toks in
         let t' = match_token t Tok_Semi in
-        parse_Statement t' (Expr(e)::lst)
+        parse_Statement t' (lst@[Expr(e)])
 
 let rec parse_Program toks =
     let (t,s) = parse_Function toks in
     (t, Program(s))
 and parse_Function toks =
     let t = match_token toks Tok_Int_Type in
-    let (t', ID(x)) = parse_Expr t in
-    let t'' = match_tokens t' [Tok_LParen; Tok_RParen; Tok_LBrace] in
-    let (t3, s) = parse_Statement t'' [] in
-    let t4 = match_token t3 Tok_RBrace in
-    (t4, Function(x, s))
+    match lookahead t with
+    | Tok_ID(x) ->
+        let t' = match_token t (Tok_ID(x)) in
+        let t'' = match_tokens t' [Tok_LParen; Tok_RParen; Tok_LBrace] in
+        let (t3, s) = parse_Statement t'' [] in
+        let t4 = match_token t3 Tok_RBrace in
+        (t4, Function(x, s))
+    | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Function %s" (string_of_token (lookahead t))))
 
 let parse_main toks =
     let (t, s) = parse_Program toks in

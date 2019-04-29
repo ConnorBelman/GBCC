@@ -3,6 +3,7 @@ type data_type =
 
 type expr =
     | ID of string
+    | Assign of string * expr
     | Constant of int
     | Neg of expr
     | BitComp of expr
@@ -33,7 +34,6 @@ type stmt =
     | Return of expr
     | Declare of string * expr option
     | Expr of expr
-    | Assign of string * expr
 
 type value =
     | Int_Val of int
