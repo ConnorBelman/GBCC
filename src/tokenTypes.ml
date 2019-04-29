@@ -31,4 +31,14 @@ type token =
     | Tok_Less
     | Tok_LessEqual
     | Tok_Assign
+    | Tok_PlusEqual
+    | Tok_MinEqual
+    | Tok_DivEqual
+    | Tok_MulEqual
+    | Tok_ModEqual
+    | Tok_LShiftEqual
+    | Tok_RShiftEqual
+    | Tok_AndEqual
+    | Tok_OrEqual
+    | Tok_XorEqual
     | EOF

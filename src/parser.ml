@@ -36,6 +36,46 @@ let rec parse_Expr toks =
             let t' = match_token t Tok_Assign in
             let (t'', e) = parse_Expr t' in
             (t'', Assign(x, e))
+        | Tok_PlusEqual ->
+            let t' = match_token t Tok_PlusEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, Add(ID(x), e)))
+        | Tok_MinEqual ->
+            let t' = match_token t Tok_MinEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, Sub(ID(x), e)))
+        | Tok_DivEqual ->
+            let t' = match_token t Tok_DivEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, Div(ID(x), e)))
+        | Tok_MulEqual ->
+            let t' = match_token t Tok_MulEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, Mul(ID(x), e)))
+        | Tok_ModEqual ->
+            let t' = match_token t Tok_ModEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, Mod(ID(x), e)))
+        | Tok_LShiftEqual ->
+            let t' = match_token t Tok_LShiftEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, ShiftLeft(ID(x), e)))
+        | Tok_RShiftEqual ->
+            let t' = match_token t Tok_RShiftEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, ShiftRight(ID(x), e)))
+        | Tok_AndEqual ->
+            let t' = match_token t Tok_AndEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, BitAnd(ID(x), e)))
+        | Tok_OrEqual ->
+            let t' = match_token t Tok_OrEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, BitOr(ID(x), e)))
+        | Tok_XorEqual ->
+            let t' = match_token t Tok_XorEqual in
+            let (t'', e) = parse_Expr t' in
+            (t'', Assign(x, BitXor(ID(x), e)))
         | Tok_Semi -> (t, ID(x))
         | _ -> parse_OrExpr toks)
     | _ -> parse_OrExpr toks
@@ -186,17 +226,6 @@ let rec parse_Statement toks lst =
         parse_Statement t'' (lst@[Return(e)])
     | Tok_Int_Type ->
         let t = match_token toks Tok_Int_Type in
-        (*let (t', ID(x)) = parse_Expr t in
-        (match lookahead t' with
-        | Tok_Assign ->
-            let t'' = match_token t' Tok_Assign in
-            let (t3, e) = parse_Expr t'' in
-            let t4 = match_token t3 Tok_Semi in
-            parse_Statement t4 (lst@[Declare(x, Some e)])
-        | Tok_Semi ->
-            let t'' = match_token t' Tok_Semi in
-            parse_Statement t'' (lst@[Declare(x, None)])
-        | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Statement %s" (string_of_token (lookahead toks))))) *)
         let Tok_ID(x) = lookahead t in
         let t' = match_token t (Tok_ID(x)) in
         (match lookahead t' with

@@ -32,6 +32,16 @@ let string_of_token (t : token) : string = match t with
     | Tok_GreaterEqual -> "Tok_GreaterEqual"
     | Tok_Less -> "Tok_Less"
     | Tok_LessEqual -> "Tok_LessEqual"
+    | Tok_PlusEqual -> "Tok_PlusEqual"
+    | Tok_MinEqual -> "Tok_MinEqual"
+    | Tok_DivEqual -> "Tok_DivEqual"
+    | Tok_MulEqual -> "Tok_MulEqual"
+    | Tok_ModEqual -> "Tok_ModEqual"
+    | Tok_LShiftEqual -> "Tok_LShiftEqual"
+    | Tok_RShiftEqual -> "Tok_RShiftEqual"
+    | Tok_AndEqual -> "Tok_AndEqual"
+    | Tok_OrEqual -> "Tok_OrEqual"
+    | Tok_XorEqual -> "Tok_XorEqual"
     | EOF -> "EOF"
 
 let string_of_list ?newline:(newline=false) (f : 'a -> string) (l : 'a list) : string =
