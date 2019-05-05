@@ -9,44 +9,48 @@ let reg_int = Str.regexp "[0-9]+"
 let reg_operators : (Str.regexp * (token * int)) list =
     List.map (fun (s, t, l) -> ((Str.regexp s), (t, l)))
         [
-        ("(",               Tok_LParen,         1);
-        (")",               Tok_RParen,         1);
-        ("{",               Tok_LBrace,         1);
-        ("}",               Tok_RBrace,         1);
-        (";",               Tok_Semi,           1);
-        ("int[ \n\t]+",     Tok_Int_Type,       3);
-        ("return[ \n\t]+",  Tok_Return,         6);
-        ("+=",              Tok_PlusEqual,      2);
-        ("-=",              Tok_MinEqual,       2);
-        ("/=",              Tok_DivEqual,       2);
-        ("*=",              Tok_MulEqual,       2);
-        ("%=",              Tok_ModEqual,       2);
-        ("<<=",             Tok_LShiftEqual,    3);
-        (">>=",             Tok_RShiftEqual,    3);
-        ("&=",              Tok_AndEqual,       2);
-        ("|=",              Tok_OrEqual,        2);
-        ("\\^=",            Tok_XorEqual,       2);
-        ("-",               Tok_Neg,            1);
-        ("~",               Tok_BitComp,        1);
-        ("+",               Tok_Plus,           1);
-        ("*",               Tok_Mul,            1);
-        ("/",               Tok_Div,            1);
-        ("&&",              Tok_And,            2);
-        ("||",              Tok_Or,             2);
-        ("<<",              Tok_ShiftLeft,      2);
-        (">>",              Tok_ShiftRight,     2);
-        ("==",              Tok_Equal,          2);
-        ("!=",              Tok_NotEqual,       2);
-        ("<=",              Tok_LessEqual,      2);
-        (">=",              Tok_GreaterEqual,   2);
-        ("<",               Tok_Less,           1);
-        (">",               Tok_Greater,        1);
-        ("!",               Tok_Not,            1);
-        ("&",               Tok_BitAnd,         1);
-        ("|",               Tok_BitOr,          1);
-        ("\\^",             Tok_BitXor,         1);
-        ("=",               Tok_Assign,         1);
-        ("%",               Tok_Mod,            1)
+        ("(",                       Tok_LParen,         1);
+        (")",                       Tok_RParen,         1);
+        ("{",                       Tok_LBrace,         1);
+        ("}",                       Tok_RBrace,         1);
+        (";",                       Tok_Semi,           1);
+        ("int[ \n\t]+",             Tok_Int_Type,       3);
+        ("return[ \n\t]+",          Tok_Return,         6);
+        ("if\\([ \n\t]+\\|(\\)",    Tok_If,             2);
+        ("else\\([ \n\t]+\\|{\\)",  Tok_Else,           4);
+        ("+=",                      Tok_PlusEqual,      2);
+        ("-=",                      Tok_MinEqual,       2);
+        ("/=",                      Tok_DivEqual,       2);
+        ("*=",                      Tok_MulEqual,       2);
+        ("%=",                      Tok_ModEqual,       2);
+        ("<<=",                     Tok_LShiftEqual,    3);
+        (">>=",                     Tok_RShiftEqual,    3);
+        ("&=",                      Tok_AndEqual,       2);
+        ("|=",                      Tok_OrEqual,        2);
+        ("\\^=",                    Tok_XorEqual,       2);
+        ("-",                       Tok_Neg,            1);
+        ("~",                       Tok_BitComp,        1);
+        ("+",                       Tok_Plus,           1);
+        ("*",                       Tok_Mul,            1);
+        ("/",                       Tok_Div,            1);
+        ("&&",                      Tok_And,            2);
+        ("||",                      Tok_Or,             2);
+        ("<<",                      Tok_ShiftLeft,      2);
+        (">>",                      Tok_ShiftRight,     2);
+        ("==",                      Tok_Equal,          2);
+        ("!=",                      Tok_NotEqual,       2);
+        ("<=",                      Tok_LessEqual,      2);
+        (">=",                      Tok_GreaterEqual,   2);
+        ("<",                       Tok_Less,           1);
+        (">",                       Tok_Greater,        1);
+        ("!",                       Tok_Not,            1);
+        ("&",                       Tok_BitAnd,         1);
+        ("|",                       Tok_BitOr,          1);
+        ("\\^",                     Tok_BitXor,         1);
+        ("=",                       Tok_Assign,         1);
+        ("%",                       Tok_Mod,            1);
+        (":",                       Tok_Colon,          1);
+        ("?",                       Tok_Question,       1)
         ]
 ;;
 

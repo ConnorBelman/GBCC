@@ -28,14 +28,17 @@ type expr =
     | LessEqual of expr * expr
 
 type stmt =
-    | NoOp
     | Program of stmt
-    | Function of string * stmt list
+    | Function of string * block list
     | Return of expr
-    | Declare of string * expr option
     | Expr of expr
+    | Conditional of expr * stmt * stmt option
+    | Compound of block list
+and declaration =
+    | Declare of string * expr option
+and block =
+    | Statement of stmt
+    | Declaration of declaration
 
 type value =
     | Int_Val of int
-
-type environment = (string * value) list

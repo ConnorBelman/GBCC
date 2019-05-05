@@ -41,4 +41,8 @@ type token =
     | Tok_AndEqual
     | Tok_OrEqual
     | Tok_XorEqual
+    | Tok_If
+    | Tok_Else
+    | Tok_Colon
+    | Tok_Question
     | EOF

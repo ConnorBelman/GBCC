@@ -16,6 +16,7 @@ let match_token (toks : token list) (tok : token) : token list =
             (string_of_list string_of_token toks)
             (string_of_token h)))
 
+(* consumes a list of tokens if they match the expected tokens *)
 let rec match_tokens (toks : token list) (t_lst : token list) : token list =
     match t_lst with
         | [] -> toks
@@ -215,34 +216,60 @@ and parse_PrimaryExpr toks =
             let (t', e) = parse_Expr t in
             let t'' = match_token t' Tok_RParen in
             (t'', e)
-        | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Expr %s" (string_of_token (lookahead toks))))
+        | _ -> raise (InvalidInputException(Printf.sprintf
+                "unexpected token found in parse_Expr %s" (string_of_token (lookahead toks))))
 
-let rec parse_Statement toks lst =
+let rec parse_Statement toks : (token list) * stmt =
     match lookahead toks with
     | Tok_Return ->
         let t = match_token toks Tok_Return in
         let (t', e) = parse_Expr t in
         let t'' = match_token t' Tok_Semi in
-        parse_Statement t'' (lst@[Return(e)])
-    | Tok_Int_Type ->
-        let t = match_token toks Tok_Int_Type in
-        let Tok_ID(x) = lookahead t in
+        (t'', Return(e))
+    | Tok_If ->
+        let t = match_tokens toks [Tok_If; Tok_LParen] in
+        let (t', e) = parse_Expr t in
+        let t'' = match_token t' Tok_RParen in
+        let (t3, s) = parse_Statement t'' in
+        (match lookahead t3 with
+        | Tok_Else ->
+            let t4 = match_token t3 Tok_Else in
+            let (t5, s') = parse_Statement t4 in
+            (t5, Conditional(e, s, Some s'))
+        | _ -> (t3, Conditional(e, s, None)))
+    | _ ->
+        let (t, e) = parse_Expr toks in
+        let t' = match_token t Tok_Semi in
+        (t', Expr(e))
+
+let rec parse_Declaration toks : token list * declaration =
+    let t = match_token toks Tok_Int_Type in
+    match lookahead t with
+    | Tok_ID(x) ->
         let t' = match_token t (Tok_ID(x)) in
         (match lookahead t' with
         | Tok_Assign ->
             let t'' = match_token t' Tok_Assign in
             let (t3, e) = parse_Expr t'' in
             let t4 = match_token t3 Tok_Semi in
-            parse_Statement t4 (lst@[Declare(x, Some e)])
+            (t4, Declare(x, Some e))
         | Tok_Semi ->
             let t'' = match_token t' Tok_Semi in
-            parse_Statement t'' (lst@[Declare(x, None)])
-        | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Statement %s" (string_of_token (lookahead t')))))
+            (t'', Declare(x, None))
+        | _ -> raise (InvalidInputException(Printf.sprintf
+                "unexpected token found in parse_Declaration %s" (string_of_token (lookahead t')))))
+    | _ -> raise (InvalidInputException(Printf.sprintf
+            "unexpected token found in parse_Declaration %s" (string_of_token (lookahead t))))
+
+let rec parse_Block toks lst : (token list) * (block list) =
+    match lookahead toks with
+    | Tok_Int_Type ->
+        let (t, d) = parse_Declaration toks in
+        parse_Block t (lst@[Declaration(d)])
     | Tok_RBrace -> (toks, lst)
     | _ ->
-        let (t, e) = parse_Expr toks in
-        let t' = match_token t Tok_Semi in
-        parse_Statement t' (lst@[Expr(e)])
+        let (t, s) = parse_Statement toks in
+        parse_Block t (lst@[Statement(s)])
 
 let rec parse_Program toks =
     let (t,s) = parse_Function toks in
@@ -253,10 +280,11 @@ and parse_Function toks =
     | Tok_ID(x) ->
         let t' = match_token t (Tok_ID(x)) in
         let t'' = match_tokens t' [Tok_LParen; Tok_RParen; Tok_LBrace] in
-        let (t3, s) = parse_Statement t'' [] in
+        let (t3, s) = parse_Block t'' [] in
         let t4 = match_token t3 Tok_RBrace in
         (t4, Function(x, s))
-    | _ -> raise (InvalidInputException(Printf.sprintf "unexpected token found in parse_Function %s" (string_of_token (lookahead t))))
+    | _ -> raise (InvalidInputException(Printf.sprintf
+            "unexpected token found in parse_Function %s" (string_of_token (lookahead t))))
 
 let parse_main toks =
     let (t, s) = parse_Program toks in
