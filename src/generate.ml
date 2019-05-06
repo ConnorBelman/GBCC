@@ -126,43 +126,51 @@ let rec code_gen_expr e env file =
         code_gen_expr y env file;
         fprintf file "\tpush af\n";
         code_gen_expr x env file;
-        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp nz,_eq%d\n\tld a,#0x01\n_eq%d:\n\tand a\n" j j
+        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp nz,_eq%d\n\tld a,#0x01\n_eq%d:\n" j j
     (* | Equal(x, y) -> if parseRet x = parseRet y then 1 else 0 *)
     | NotEqual(x, y) ->
         let j = fresh() in
         code_gen_expr y env file;
         fprintf file "\tpush af\n";
         code_gen_expr x env file;
-        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp z,_neq%d\n\tld a,#0x01\n_neq%d:\n\tand a\n" j j
+        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp z,_neq%d\n\tld a,#0x01\n_neq%d:\n" j j
     (* | NotEqual(x, y) -> if parseRet x != parseRet y then 1 else 0 *)
     | Less(x, y) ->
         let j = fresh() in
         code_gen_expr y env file;
         fprintf file "\tpush af\n";
         code_gen_expr x env file;
-        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp nc,_ls%d\n\tld a,#0x01\n_ls%d:\n\tand a\n" j j
+        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp nc,_ls%d\n\tld a,#0x01\n_ls%d:\n" j j
     (* | Less(x, y) -> if parseRet x < parseRet y then 1 else 0 *)
     | Greater(x, y) ->
         let j = fresh() in
         code_gen_expr x env file;
         fprintf file "\tpush af\n";
         code_gen_expr y env file;
-        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp nc,_gr%d\n\tld a,#0x01\n_gr%d:\n\tand a\n" j j
+        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp nc,_gr%d\n\tld a,#0x01\n_gr%d:\n" j j
     (* | Greater(x, y) -> if parseRet x > parseRet y then 1 else 0 *)
     | LessEqual(x, y) ->
         let j = fresh() in
         code_gen_expr x env file;
         fprintf file "\tpush af\n";
         code_gen_expr y env file;
-        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp c,_leq%d\n\tld a,#0x01\n_leq%d:\n\tand a\n" j j
+        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp c,_leq%d\n\tld a,#0x01\n_leq%d:\n" j j
     (* | LessEqual(x, y) -> if parseRet x <= parseRet y then 1 else 0 *)
     | GreaterEqual(x, y) ->
         let j = fresh() in
         code_gen_expr y env file;
         fprintf file "\tpush af\n";
         code_gen_expr x env file;
-        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp c,_geq%d\n\tld a,#0x01\n_geq%d:\n\tand a\n" j j
+        fprintf file "\tpop de\n\tcp d\n\tld a,#0x00\n\tjp c,_geq%d\n\tld a,#0x01\n_geq%d:\n" j j
     (* | GreaterEqual(x, y) -> if parseRet x >= parseRet y then 1 else 0 *)
+    | Ternary(x, y, z) ->
+        let j = fresh() in
+        code_gen_expr x env file;
+        fprintf file "\tand a\n\tjp z,_cond%d\n" j;
+        code_gen_expr y env file;
+        fprintf file "\tjp _condend%d\n_cond%d:\n" j j;
+        code_gen_expr z env file;
+        fprintf file "_condend%d:\n" j
     (*| _ -> printf "Error: unmatched expession in parseRet" *)
 
 let rec code_gen_statement s env file =
@@ -177,13 +185,13 @@ let rec code_gen_statement s env file =
         code_gen_expr e env file;
         (match o with
         | Some s' ->
-            fprintf file "\tjp z,_else%d\n" j;
+            fprintf file "\tand a\n\tjp z,_else%d\n" j;
             code_gen_statement s env file;
             fprintf file "\tjp _ifend%d\n_else%d:\n" j j;
             code_gen_statement s' env file;
             fprintf file "_ifend%d:\n" j
         | None ->
-            fprintf file "\tjp z,_ifend%d\n" j;
+            fprintf file "\tand a\n\tjp z,_ifend%d\n" j;
             code_gen_statement s env file;
             fprintf file "_ifend%d:\n" j)
     | _ -> printf "Error: unmatched statement in code_gen_function"
@@ -204,24 +212,6 @@ and code_gen_block lst env si file =
         code_gen_statement s env file;
         code_gen_block t env si file
     | Declaration(d)::t -> code_gen_declaration d t env si file
-    (* match lst with
-    | [] -> ()
-    | Return(e)::t ->
-        parse_expr e env file;
-        fprintf file "\tld e,a\n\tld h,b\n\tld l,c\n\tld sp,hl\n\tpop bc\n\tret\n";
-        code_gen_block t env si file
-    | Declare(x, e_opt)::t ->
-        if var_contains env x then printf "Error: var %s already initialized" x else
-        (match e_opt with
-        | None -> fprintf file "\tld l,#0x00\n\tpush hl\n"
-        | Some (e) ->
-            parse_expr e env file;
-            fprintf file "\tld l,a\n\tpush hl\n";);
-        code_gen_block t ((x, si)::env) (si - 2) file
-    | Expr(e)::t ->
-        parse_expr e env file;
-        code_gen_block t env si file
-    | _ -> printf "Error: unmatched statement in code_gen_function" *)
 
 let rec code_gen_program ast file =
     match ast with

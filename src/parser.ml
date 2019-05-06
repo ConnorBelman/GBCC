@@ -78,8 +78,18 @@ let rec parse_Expr toks =
             let (t'', e) = parse_Expr t' in
             (t'', Assign(x, BitXor(ID(x), e)))
         | Tok_Semi -> (t, ID(x))
-        | _ -> parse_OrExpr toks)
-    | _ -> parse_OrExpr toks
+        | _ -> parse_ConditionalExpr toks)
+    | _ -> parse_ConditionalExpr toks
+and parse_ConditionalExpr toks =
+    let (t, e) = parse_OrExpr toks in
+    match lookahead t with
+    | Tok_Question ->
+        let t' = match_token t Tok_Question in
+        let (t'', e') = parse_Expr t' in
+        let t3 = match_token t'' Tok_Colon in
+        let (t4, e'') = parse_Expr t3 in
+        (t4, Ternary(e, e', e''))
+    | _ -> (t, e)
 and parse_OrExpr toks =
     let (t, e) = parse_AndExpr toks in
     match lookahead t with

@@ -26,6 +26,7 @@ type expr =
     | GreaterEqual of expr * expr
     | Less of expr * expr
     | LessEqual of expr * expr
+    | Ternary of expr * expr * expr
 
 type stmt =
     | Program of stmt
