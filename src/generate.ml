@@ -178,8 +178,9 @@ let rec code_gen_statement s env scope_env si file =
     | Return(e) ->
         code_gen_expr e env file;
         fprintf file "\tld e,a\n\tld h,b\n\tld l,c\n\tld sp,hl\n\tpop bc\n\tret\n";
-    | Expr(e) ->
+    | Expr(Some e) ->
         code_gen_expr e env file;
+    | Expr(None) -> ()
     | Conditional(e, s, o) ->
         let j = fresh() in
         code_gen_expr e env file;
@@ -195,6 +196,13 @@ let rec code_gen_statement s env scope_env si file =
             code_gen_statement s env scope_env si file;
             fprintf file "_ifend%d:\n" j)
     | Compound(b) -> code_gen_block b env [] si file
+    | While(e, s) ->
+        let j = fresh() in
+        fprintf file "_while%d:" j;
+        code_gen_expr e env file;
+        fprintf file "\tand a\n\tjp z,_whileend%d" j;
+        code_gen_statement s env scope_env si file;
+        fprintf file "\tjp _while%d\n_whileend%d:\n" j j
     | _ -> printf "Error: unmatched statement in code_gen_statement"
 and code_gen_declaration d t env scope_env si file =
     match d with

@@ -45,4 +45,9 @@ type token =
     | Tok_Else
     | Tok_Colon
     | Tok_Question
+    | Tok_For
+    | Tok_While
+    | Tok_Do
+    | Tok_Break
+    | Tok_Continue
     | EOF

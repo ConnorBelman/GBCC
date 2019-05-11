@@ -252,10 +252,121 @@ let rec parse_Statement toks : (token list) * stmt =
         let (t', b) = parse_Block t [] in
         let t'' = match_token t' Tok_RBrace in
         (t'', Compound(b))
+    | Tok_For ->
+        let t = match_tokens toks [Tok_For; Tok_LParen] in
+        (match lookahead t with
+        | Tok_Semi ->
+            let t' = match_token t Tok_Semi in
+            (match lookahead t' with
+            | Tok_Semi ->
+                let t'' = match_token t' Tok_Semi in
+                (match lookahead t'' with
+                | Tok_RParen ->
+                    let t3 = match_token t'' Tok_RParen in
+                    let (t4, s) = parse_Statement t3 in
+                    (t4, For(None, Constant(1), None, s))
+                | _ ->
+                    let (t3, e) = parse_Expr t'' in
+                    let t4 = match_token t3 Tok_RParen in
+                    let (t5, s) = parse_Statement t4 in
+                    (t5, For(None, Constant(1), Some e, s)))
+            | _ ->
+                let (t'', e) = parse_Expr t' in
+                let t3 = match_token t'' Tok_Semi in
+                (match lookahead t3 with
+                | Tok_RParen ->
+                    let t4 = match_token t3 Tok_RParen in
+                    let (t5, s) = parse_Statement t4 in
+                    (t5, For(None, e, None, s))
+                | _ ->
+                    let (t4, e') = parse_Expr t3 in
+                    let t5 = match_token t4 Tok_RParen in
+                    let (t6, s) = parse_Statement t5 in
+                    (t6, For(None, e, Some e', s))))
+        | Tok_Int_Type ->
+            let (t', d) = parse_Declaration t in
+            let t'' = match_token t' Tok_Semi in
+            (match lookahead t'' with
+            | Tok_Semi ->
+                let t3 = match_token t'' Tok_Semi in
+                (match lookahead t3 with
+                | Tok_RParen ->
+                    let t4 = match_token t3 Tok_RParen in
+                    let (t5, s) = parse_Statement t4 in
+                    (t5, ForDecl(d, Constant(1), None, s))
+                | _ ->
+                    let (t4, e) = parse_Expr t3 in
+                    let t5 = match_token t4 Tok_RParen in
+                    let (t6, s) = parse_Statement t5 in
+                    (t6, ForDecl(d, Constant(1), Some e, s)))
+            | _ ->
+                let (t3, e) = parse_Expr t'' in
+                let t4 = match_token t3 Tok_Semi in
+                (match lookahead t4 with
+                | Tok_RParen ->
+                    let t5 = match_token t4 Tok_RParen in
+                    let (t6, s) = parse_Statement t5 in
+                    (t6, ForDecl(d, e, None, s))
+                | _ ->
+                    let (t5, e') = parse_Expr t4 in
+                    let t6 = match_token t5 Tok_RParen in
+                    let (t7, s) = parse_Statement t6 in
+                    (t7, ForDecl(d, e, Some e', s))))
+        | _ ->
+            let (t', e) = parse_Expr t in
+            let t'' = match_token t' Tok_Semi in
+            (match lookahead t'' with
+            | Tok_Semi ->
+                let t3 = match_token t'' Tok_Semi in
+                (match lookahead t3 with
+                | Tok_RParen ->
+                    let t4 = match_token t3 Tok_RParen in
+                    let (t5, s) = parse_Statement t4 in
+                    (t5, For(Some e, Constant(1), None, s))
+                | _ ->
+                    let (t4, e') = parse_Expr t3 in
+                    let t5 = match_token t4 Tok_RParen in
+                    let (t6, s) = parse_Statement t5 in
+                    (t6, For(Some e, Constant(1), Some e', s)))
+            | _ ->
+                let (t3, e') = parse_Expr t'' in
+                let t4 = match_token t3 Tok_Semi in
+                (match lookahead t4 with
+                | Tok_RParen ->
+                    let t5 = match_token t4 Tok_RParen in
+                    let (t6, s) = parse_Statement t5 in
+                    (t6, For(Some e, e', None, s))
+                | _ ->
+                    let (t5, e'') = parse_Expr t4 in
+                    let t6 = match_token t5 Tok_RParen in
+                    let (t7, s) = parse_Statement t6 in
+                    (t7, For(Some e, e', Some e'', s)))))
+    | Tok_While ->
+        let t = match_tokens toks [Tok_While; Tok_LParen] in
+        let (t', e) = parse_Expr t in
+        let t'' = match_token t' Tok_RParen in
+        let (t3, s) = parse_Statement t'' in
+        (t3, While(e, s))
+    | Tok_Do ->
+        let t = match_token toks Tok_Do in
+        let (t', s) = parse_Statement t in
+        let t'' = match_token t' Tok_While in
+        let (t3, e) = parse_Expr t'' in
+        let t4 = match_token t3 Tok_Semi in
+        (t4, Do(s, e))
+    | Tok_Break ->
+        let t = match_tokens toks [Tok_Break; Tok_Semi] in
+        (t, Break)
+    | Tok_Continue ->
+        let t = match_tokens toks [Tok_Continue; Tok_Semi] in
+        (t, Continue)
+    | Tok_Semi ->
+        let t = match_token toks Tok_Semi in
+        (t, Expr(None))
     | _ ->
         let (t, e) = parse_Expr toks in
         let t' = match_token t Tok_Semi in
-        (t', Expr(e))
+        (t', Expr(Some e))
 and parse_Declaration toks : token list * declaration =
     let t = match_token toks Tok_Int_Type in
     match lookahead t with

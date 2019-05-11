@@ -46,6 +46,11 @@ let string_of_token (t : token) : string = match t with
     | Tok_Else -> " Tok_Else"
     | Tok_Colon -> "Tok_Colon"
     | Tok_Question -> "Tok_Question"
+    | Tok_For -> "Tok_For"
+    | Tok_While -> "Tok_While"
+    | Tok_Do -> "Tok_Do"
+    | Tok_Break -> "Tok_Break"
+    | Tok_Continue -> "Tok_Continue"
     | EOF -> "EOF"
 
 let string_of_list ?newline:(newline=false) (f : 'a -> string) (l : 'a list) : string =

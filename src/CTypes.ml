@@ -32,9 +32,15 @@ type stmt =
     | Program of stmt
     | Function of string * block list
     | Return of expr
-    | Expr of expr
+    | Expr of expr option
     | Conditional of expr * stmt * stmt option
     | Compound of block list
+    | For of expr option * expr * expr option * stmt
+    | ForDecl of declaration * expr * expr option * stmt
+    | While of expr * stmt
+    | Do of stmt * expr
+    | Break
+    | Continue
 and declaration =
     | Declare of string * expr option
 and block =
