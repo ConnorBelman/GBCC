@@ -173,7 +173,7 @@ let rec code_gen_expr e env file =
         fprintf file "_condend%d:\n" j
     (*| _ -> printf "Error: unmatched expession in parseRet" *)
 
-let rec code_gen_statement s env file =
+let rec code_gen_statement s env scope_env si file =
     match s with
     | Return(e) ->
         code_gen_expr e env file;
@@ -186,38 +186,39 @@ let rec code_gen_statement s env file =
         (match o with
         | Some s' ->
             fprintf file "\tand a\n\tjp z,_else%d\n" j;
-            code_gen_statement s env file;
+            code_gen_statement s env scope_env si file;
             fprintf file "\tjp _ifend%d\n_else%d:\n" j j;
-            code_gen_statement s' env file;
+            code_gen_statement s' env scope_env si file;
             fprintf file "_ifend%d:\n" j
         | None ->
             fprintf file "\tand a\n\tjp z,_ifend%d\n" j;
-            code_gen_statement s env file;
+            code_gen_statement s env scope_env si file;
             fprintf file "_ifend%d:\n" j)
-    | _ -> printf "Error: unmatched statement in code_gen_function"
-and code_gen_declaration d t env si file =
+    | Compound(b) -> code_gen_block b env [] si file
+    | _ -> printf "Error: unmatched statement in code_gen_statement"
+and code_gen_declaration d t env scope_env si file =
     match d with
     | Declare(x, e_opt) ->
-        if var_contains env x then printf "Error: var %s already initialized" x else
+        if var_contains scope_env x then printf "Error: var %s already initialized" x else
         (match e_opt with
         | None -> fprintf file "\tld l,#0x00\n\tpush hl\n"
         | Some (e) ->
             code_gen_expr e env file;
             fprintf file "\tld l,a\n\tpush hl\n";);
-        code_gen_block t ((x, si)::env) (si - 2) file
-and code_gen_block lst env si file =
+        code_gen_block t ((x, si)::env) ((x, si)::scope_env) (si - 2) file
+and code_gen_block lst env scope_env si file =
     match lst with
-    | [] -> ()
+    | [] -> fprintf file "\tadd sp,#0x%04X\n" (2 * List.length scope_env)
     | Statement(s)::t ->
-        code_gen_statement s env file;
-        code_gen_block t env si file
-    | Declaration(d)::t -> code_gen_declaration d t env si file
+        code_gen_statement s env scope_env si file;
+        code_gen_block t env scope_env si file
+    | Declaration(d)::t -> code_gen_declaration d t env scope_env si file
 
 let rec code_gen_program ast file =
     match ast with
     | Program(s) -> code_gen_program s file
     | Function(x, s) ->
         fprintf file "_%s:\n\tpush bc\n\tlda hl,00(sp)\n\tld b,h\n\tld c,l\n" x;
-        code_gen_block s [] (-2) file
+        code_gen_block s [] [] (-2) file
     | _ -> printf "Error: unmatched statement in code_gen_program"
     (* | Return(e) -> fprintf file "ld de,$%04X\n\tret\n" (parseRet e file) *)

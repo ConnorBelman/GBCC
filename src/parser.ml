@@ -247,12 +247,16 @@ let rec parse_Statement toks : (token list) * stmt =
             let (t5, s') = parse_Statement t4 in
             (t5, Conditional(e, s, Some s'))
         | _ -> (t3, Conditional(e, s, None)))
+    | Tok_LBrace ->
+        let t = match_token toks Tok_LBrace in
+        let (t', b) = parse_Block t [] in
+        let t'' = match_token t' Tok_RBrace in
+        (t'', Compound(b))
     | _ ->
         let (t, e) = parse_Expr toks in
         let t' = match_token t Tok_Semi in
         (t', Expr(e))
-
-let rec parse_Declaration toks : token list * declaration =
+and parse_Declaration toks : token list * declaration =
     let t = match_token toks Tok_Int_Type in
     match lookahead t with
     | Tok_ID(x) ->
@@ -270,8 +274,7 @@ let rec parse_Declaration toks : token list * declaration =
                 "unexpected token found in parse_Declaration %s" (string_of_token (lookahead t')))))
     | _ -> raise (InvalidInputException(Printf.sprintf
             "unexpected token found in parse_Declaration %s" (string_of_token (lookahead t))))
-
-let rec parse_Block toks lst : (token list) * (block list) =
+and parse_Block toks lst : (token list) * (block list) =
     match lookahead toks with
     | Tok_Int_Type ->
         let (t, d) = parse_Declaration toks in
