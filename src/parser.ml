@@ -285,33 +285,32 @@ let rec parse_Statement toks : (token list) * stmt =
                     (t6, For(None, e, Some e', s))))
         | Tok_Int_Type ->
             let (t', d) = parse_Declaration t in
-            let t'' = match_token t' Tok_Semi in
-            (match lookahead t'' with
+            (match lookahead t' with
             | Tok_Semi ->
+                let t'' = match_token t' Tok_Semi in
+                (match lookahead t'' with
+                | Tok_RParen ->
+                    let t3 = match_token t'' Tok_RParen in
+                    let (t4, s) = parse_Statement t3 in
+                    (t4, ForDecl(d, Constant(1), None, s))
+                | _ ->
+                    let (t3, e) = parse_Expr t'' in
+                    let t4 = match_token t3 Tok_RParen in
+                    let (t5, s) = parse_Statement t4 in
+                    (t5, ForDecl(d, Constant(1), Some e, s)))
+            | _ ->
+                let (t'', e) = parse_Expr t' in
                 let t3 = match_token t'' Tok_Semi in
                 (match lookahead t3 with
                 | Tok_RParen ->
                     let t4 = match_token t3 Tok_RParen in
                     let (t5, s) = parse_Statement t4 in
-                    (t5, ForDecl(d, Constant(1), None, s))
+                    (t5, ForDecl(d, e, None, s))
                 | _ ->
-                    let (t4, e) = parse_Expr t3 in
+                    let (t4, e') = parse_Expr t3 in
                     let t5 = match_token t4 Tok_RParen in
                     let (t6, s) = parse_Statement t5 in
-                    (t6, ForDecl(d, Constant(1), Some e, s)))
-            | _ ->
-                let (t3, e) = parse_Expr t'' in
-                let t4 = match_token t3 Tok_Semi in
-                (match lookahead t4 with
-                | Tok_RParen ->
-                    let t5 = match_token t4 Tok_RParen in
-                    let (t6, s) = parse_Statement t5 in
-                    (t6, ForDecl(d, e, None, s))
-                | _ ->
-                    let (t5, e') = parse_Expr t4 in
-                    let t6 = match_token t5 Tok_RParen in
-                    let (t7, s) = parse_Statement t6 in
-                    (t7, ForDecl(d, e, Some e', s))))
+                    (t6, ForDecl(d, e, Some e', s))))
         | _ ->
             let (t', e) = parse_Expr t in
             let t'' = match_token t' Tok_Semi in

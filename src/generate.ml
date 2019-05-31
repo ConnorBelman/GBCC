@@ -173,7 +173,7 @@ let rec code_gen_expr e env file =
         fprintf file "_condend%d:\n" j
     (*| _ -> printf "Error: unmatched expession in parseRet" *)
 
-let rec code_gen_statement s env scope_env si file =
+let rec code_gen_statement s env scope_env si label file =
     match s with
     | Return(e) ->
         code_gen_expr e env file;
@@ -187,24 +187,71 @@ let rec code_gen_statement s env scope_env si file =
         (match o with
         | Some s' ->
             fprintf file "\tand a\n\tjp z,_else%d\n" j;
-            code_gen_statement s env scope_env si file;
+            code_gen_statement s env scope_env si label file;
             fprintf file "\tjp _ifend%d\n_else%d:\n" j j;
-            code_gen_statement s' env scope_env si file;
+            code_gen_statement s' env scope_env si label file;
             fprintf file "_ifend%d:\n" j
         | None ->
             fprintf file "\tand a\n\tjp z,_ifend%d\n" j;
-            code_gen_statement s env scope_env si file;
+            code_gen_statement s env scope_env si label file;
             fprintf file "_ifend%d:\n" j)
-    | Compound(b) -> code_gen_block b env [] si file
+    | Compound(b) -> code_gen_block b env [] si label file
     | While(e, s) ->
         let j = fresh() in
-        fprintf file "_while%d:" j;
+        fprintf file "_while%d:\n" j;
         code_gen_expr e env file;
-        fprintf file "\tand a\n\tjp z,_whileend%d" j;
-        code_gen_statement s env scope_env si file;
+        fprintf file "\tand a\n\tjp z,_whileend%d\n" j;
+        code_gen_statement s env scope_env si ("while", j) file;
         fprintf file "\tjp _while%d\n_whileend%d:\n" j j
+    | Do(s, e) ->
+        let j = fresh() in
+        fprintf file "_do%d:\n" j;
+        code_gen_statement s env scope_env si ("do", j) file;
+        code_gen_expr e env file;
+        fprintf file "\tand a\n\tjp nz,_do%d\n_doend%d:" j j
+    | For(o, e, o', s) ->
+        let j = fresh() in
+        (match o with
+        | Some e -> code_gen_expr e env file
+        | None -> ());
+        fprintf file "_for%d:\n" j;
+        code_gen_expr e env file;
+        fprintf file "\tand a\n\tjp z,_forend%d\n" j;
+        code_gen_statement s env scope_env si ("for", j) file;
+        (match o' with
+        | Some e -> code_gen_expr e env file
+        | None -> ());
+        fprintf file "\tjp _for%d\n_forend%d:\n" j j
+    | ForDecl(d, e, o, s) ->
+        let j = fresh() in
+        (match d with
+        | Declare(x, Some e') ->
+            code_gen_expr e' env file;
+            let env = ((x, si)::env) in
+            let scope_env = ((x, si)::scope_env) in
+            fprintf file "\tld l,a\n\tpush hl\n_for%d:\n" j;
+            code_gen_expr e env file;
+            fprintf file "\tand a\n\tjp z,_forend%d\n" j;
+            code_gen_statement s env scope_env (si - 2) ("for", j) file;
+            fprintf file "_forpost%d:\n" j;
+            (match o with
+            | Some e -> code_gen_expr e env file
+            | None -> ());
+            fprintf file "\tjp _for%d\n_forend%d:\n\tadd sp,#0x02\n" j j
+        | Declare(x, None) -> printf "Error: for loop declaration must have initial value")
+    | Break ->
+        let (l, j) = label in
+        (match l with
+        | "" -> printf "Error: invalid break statement"
+        | _ -> fprintf file "\tjp _%send%d\n" l j)
+    | Continue ->
+        let (l, j) = label in
+        (match l with
+        | "" -> printf "Error: invalid continue statement"
+        | "for" -> fprintf file "\tjp _forpost%d\n" j
+        | _ -> fprintf file "\tjp _%s%d\n" l j)
     | _ -> printf "Error: unmatched statement in code_gen_statement"
-and code_gen_declaration d t env scope_env si file =
+and code_gen_declaration d t env scope_env si label file =
     match d with
     | Declare(x, e_opt) ->
         if var_contains scope_env x then printf "Error: var %s already initialized" x else
@@ -213,20 +260,22 @@ and code_gen_declaration d t env scope_env si file =
         | Some (e) ->
             code_gen_expr e env file;
             fprintf file "\tld l,a\n\tpush hl\n";);
-        code_gen_block t ((x, si)::env) ((x, si)::scope_env) (si - 2) file
-and code_gen_block lst env scope_env si file =
+        code_gen_block t ((x, si)::env) ((x, si)::scope_env) (si - 2) label file
+and code_gen_block lst env scope_env si label file =
     match lst with
-    | [] -> fprintf file "\tadd sp,#0x%04X\n" (2 * List.length scope_env)
+    | [] ->
+        let size = 2 * List.length scope_env in
+        if size = 0 then () else fprintf file "\tadd sp,#0x%04X\n" size
     | Statement(s)::t ->
-        code_gen_statement s env scope_env si file;
-        code_gen_block t env scope_env si file
-    | Declaration(d)::t -> code_gen_declaration d t env scope_env si file
+        code_gen_statement s env scope_env si label file;
+        code_gen_block t env scope_env si label file
+    | Declaration(d)::t -> code_gen_declaration d t env scope_env si label file
 
 let rec code_gen_program ast file =
     match ast with
     | Program(s) -> code_gen_program s file
     | Function(x, s) ->
         fprintf file "_%s:\n\tpush bc\n\tlda hl,00(sp)\n\tld b,h\n\tld c,l\n" x;
-        code_gen_block s [] [] (-2) file
+        code_gen_block s [] [] (-2) ("", 0) file
     | _ -> printf "Error: unmatched statement in code_gen_program"
     (* | Return(e) -> fprintf file "ld de,$%04X\n\tret\n" (parseRet e file) *)
